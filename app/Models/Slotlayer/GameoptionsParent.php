@@ -35,4 +35,9 @@ class GameoptionsParent extends Model
     {
         return $this->belongsTo('App\Models\Slotlayer\AccessProfiles', 'access_profile', 'id');
     }
+    public function gameoptions()
+    {
+        return $this->hasMany('App\Models\Slotlayer\Gameoptions', 'apikey_parent', 'parent_key');
+    }
+
 }

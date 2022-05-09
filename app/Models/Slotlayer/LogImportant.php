@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use \Cache;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Webpatser\Uuid\Uuid;
 use App\Models\Slotlayer\GameoptionsParent;
 use App\Models\Slotlayer\Gameoptions;
+use Webpatser\Uuid\Uuid;
+use Illuminate\Support\Str;
 
-class LogImportant
+class LogImportant extends Model
 {
 
    use HasFactory;
@@ -19,6 +20,7 @@ class LogImportant
    public $timestamps = true;
    public $primaryKey = 'uid';
    public $uuidKey = 'uid';
+   public $incrementing = false; 
 
     /**
      * The attributes that are mass assignable.
@@ -28,18 +30,20 @@ class LogImportant
     protected $table = 'log_important';
      
     protected $fillable = [
-        'uid', 'log_level', 'log_message', 'notified'
+        'log_level', 'log_message', 'notified'
     ];
 
     protected $casts = [
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
-
+ 
 
     public static function insertImportantLog($log_level, $log_message) {
+
+
             $sessionLog = self::insert([
-                'uid' =>  Uuid::generate(4),
+                'uid' =>  Str::uuid(),
                 'log_level' => $log_level,
                 'log_message' => $log_message,
                 'notified' => 0,

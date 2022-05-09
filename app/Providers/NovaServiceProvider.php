@@ -17,6 +17,13 @@ use Laravel\Nova\Menu\MenuGroup;
 use App\Nova\CreateSessionErrorsLog;
 use App\Nova\CallbackErrorsLog;
 use App\Nova\AccessProfiles;
+use App\Nova\ProviderBaseList;
+use App\Nova\AccessProvidersList;
+use App\Nova\CurrencySubkeys;
+use App\Nova\GameTransactionHistory;
+use App\Nova\GameTransactionLiveHistory;
+use App\Nova\GamelistBaseView;
+use App\Nova\ProfileGamesList;
 
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -37,12 +44,16 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::dashboard(Main::class)->icon('chart-bar'),
                 MenuSection::make('User Profile')->path('/resources/users/'.auth()->user()->id)->icon('key'),
                 MenuSection::make('API', [
-                            MenuItem::resource(Gameoptions::class),
+                    MenuItem::resource(Gameoptions::class),
+                    MenuItem::resource(CurrencySubkeys::class),
+                    MenuItem::resource(GameTransactionHistory::class),
+                    MenuItem::resource(ProfileGamesList::class),
+
+
                     MenuGroup::make('Logs', [
                             MenuItem::resource(CreateSessionErrorsLog::class),
                             MenuItem::resource(CallbackErrorsLog::class),
                     ])
-
                 ])->icon('lightning-bolt')->collapsable(),
 
                 MenuSection::make('Links', [
@@ -53,9 +64,18 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
             $adminpanel = [
                 MenuSection::make('Staff', [
+                    MenuItem::resource(GameTransactionLiveHistory::class),
                     MenuItem::resource(User::class),
-                    MenuItem::resource(AccessProfiles::class),
-                ])->icon('shield-check')->collapsable(),
+
+                    MenuGroup::make('Base List', [
+                        MenuItem::resource(ProviderBaseList::class),
+                        MenuItem::resource(GamelistBaseView::class),
+                    ]),
+                    MenuGroup::make('Profiles', [
+                        MenuItem::resource(AccessProfiles::class),
+                        MenuItem::resource(AccessProvidersList::class),
+                    ])
+                    ])->icon('shield-check')->collapsable(),
             ];
 
         if($request->user()->admin === 1) {
@@ -63,6 +83,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         } else {
             return $userpanel;
         }
+
 
 
 

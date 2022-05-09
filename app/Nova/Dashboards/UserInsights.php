@@ -16,7 +16,6 @@ class UserInsights extends Dashboard
     public function cards()
     {
         return [
-            new TotalUsers,
             new UsersOverTime,
         ];
     }

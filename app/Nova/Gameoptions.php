@@ -8,13 +8,13 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
-use Inspheric\Fields\Indicator;
 use Laravel\Nova\Panel;
 use Illuminate\Support\Str;
 use Laravel\Nova\Fields\Hidden;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\DateTime;
 
 class Gameoptions extends ResourceRegular
 {
@@ -31,6 +31,19 @@ class Gameoptions extends ResourceRegular
           return false;
         }
     }
+    public function authorizedToReplicate(Request $request)
+    {
+        if(auth()->user()) {
+            if($request->user()->admin != '1') {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+          return false;
+        }
+    }
+
 
 
     public function authorizedToDelete(Request $request)
@@ -66,6 +79,9 @@ class Gameoptions extends ResourceRegular
             return $query;
         }
     }
+
+
+
     /**
      * The model the resource corresponds to.
      *
@@ -122,7 +138,15 @@ class Gameoptions extends ResourceRegular
                     return $request->user()->admin != "1";
             }), 
             
-            BelongsTo::make('Access', 'accessprofile', 'App\Nova\AccessProfiles'),
+            BelongsTo::make('Access', 'accessprofile', 'App\Nova\AccessProfiles')->hideFromIndex(function ($request) {
+                    return $request->user()->admin != "1";
+            })
+                ->hideWhenUpdating(function ($request) {
+                        return $request->user()->admin != "1";
+                })
+            ->readonly(function ($request) {
+                    return $request->user()->admin != "1";
+            }),
 
         
             Text::make('API Key', 'apikey_parent')
@@ -134,9 +158,12 @@ class Gameoptions extends ResourceRegular
                 ->readonly(function() {
                     return $this->resource->id ? true : false;
                 }),
-                Text::make('Secret Password', 'operator_secret')
+
+                Password::make('Secret Password', 'operator_secret')
                 ->sortable()
+                ->readonly()
                 ->hideFromIndex()
+                ->help('Go to index page and select dots to regenerate new secret key.')
                 ->rules('required', 'max:32', 'min:3')
                 ->default(Str::random(12))->withMeta(['extraAttributes' => ['type' => 'password']]),
 
@@ -166,6 +193,13 @@ class Gameoptions extends ResourceRegular
                 ->default('http://betboi.io/api/callback/tollgate/')
                 ->rules('required', 'max:128', 'min:3'),
 
+            Text::make('Allowed IPs', 'allowed_ips')
+                ->hideFromIndex()
+                ->help('Add IP from action overview. Read documentation for guidance to add IPs.')
+                ->default('123.123.123.123')
+                ->readonly()
+                ->rules('required', 'max:128', 'min:3'),
+
             Text::make('Casino Website URL', 'operatorurl')
                 ->hideFromIndex()
                 ->help('Casino URL is used in various games to redirect player on cashier buttons and on errors.')
@@ -186,6 +220,7 @@ class Gameoptions extends ResourceRegular
             ->hideWhenUpdating(function ($request) {
                     return $request->user()->admin != "1";
             })
+            ->default('0')
             ->readonly(function ($request) {
                     return $request->user()->admin != "1";
             })
@@ -198,12 +233,21 @@ class Gameoptions extends ResourceRegular
     protected function activityFields()
     {
         return [
-            Text::make('API Endpoint URL', 'callbackurl')
+            DateTime::make('Created', 'created_at')->hideWhenUpdating()->hideWhenCreating()->readonly()->sortable(),
+            DateTime::make('Last Activity', 'updated_at')->hideWhenUpdating()->hideWhenCreating()->readonly()->sortable()->withDateFormat('d-M-Y, H:i')->displayUsing(function($lastActive) {
+                if ($lastActive === null) {
+                        return null;
+                    }
+                return $lastActive->diffForHumans();
+            }),
+            Text::make('Real Sessions Created', 'real_sessions_stat')
                 ->hideFromIndex()
-                ->default('http://casinourl.com/api/callback/bulkbet/')
-                ->rules('required', 'max:128', 'min:3'),
-
+                ->default(0)
+                ->readonly()
+                ->rules('required', 'max:5', 'min:5'),
             ];
+
+
     }
         /** 
      * Get the cards available for the request.
@@ -249,8 +293,14 @@ class Gameoptions extends ResourceRegular
     return [
         (new Actions\ViewOperatorSecret)->onlyOnTableRow()->showOnDetail()
             ->confirmText(' Do you want generate new operator secret? Operator secret is only show once. It will immediately invalidate the old operator secret for any use.')
-            ->confirmButtonText('Generate new secret key')
+            ->confirmButtonText('Activate the above new secret key')
             ->cancelButtonText("Cancel"),
-    ];
+        (new Actions\AddAllowedIP)->onlyOnTableRow()->showOnDetail()
+            ->confirmButtonText('Add IP to allowed list')
+            ->cancelButtonText("Cancel"),
+        (new Actions\TruncateIPWhitelist)->onlyOnTableRow()->showOnDetail()
+            ->confirmButtonText('Truncate IP Whitelist')
+            ->cancelButtonText("Cancel"),
+        ];
     }
 }

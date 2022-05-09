@@ -17,6 +17,7 @@ class BanCheck
      * @param  string|null  ...$guards
      * @return mixed
      */
+
         public function handle($request, Closure $next)
         {
 
@@ -25,7 +26,8 @@ class BanCheck
                 //return redirect('home');
                 abort(403, 'Your account is non-active - please contact support.');
             }
+       return $next($request);
 
-            return $next($request);
+
         }
 }

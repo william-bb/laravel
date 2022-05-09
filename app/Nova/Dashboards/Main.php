@@ -4,6 +4,10 @@ namespace App\Nova\Dashboards;
 
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Dashboards\Main as Dashboard;
+use Coroowicaksono\ChartJsIntegration\StackedChart;
+use App\Nova\Metrics\NewUsers;
+use App\Nova\Metrics\RecentGameTransactions;
+use App\Nova\Metrics\DueGgrPerProvider;
 
 class Main extends Dashboard
 {
@@ -21,7 +25,9 @@ class Main extends Dashboard
     public function cards()
     {
         return [
-        new UserInsights,
+        new RecentGameTransactions,
+        new DueGgrPerProvider,
+                new NewUsers,
         ];
     }
 }

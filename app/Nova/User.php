@@ -138,13 +138,17 @@ class User extends Resource
                 ->rules('required', 'email', 'max:100')
                 ->creationRules('unique:users,email')
                 ->updateRules('unique:users,email,{{resourceId}}'),
-
+                /*
+            DateTime::make('Last Billing', 'last_bill')->hideWhenCreating()->readonly()->sortable(),
+            */
             DateTime::make('Creation Date', 'created_at')->hideWhenCreating()->readonly()->sortable(),
 
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
+
+
 
         Boolean::make('Active')
             ->trueValue('1')
@@ -156,8 +160,9 @@ class User extends Resource
             })
             ->falseValue('0'),
 
+            //new Panel('Agreement', $this->userAgreement()),
 
-            new Panel('Billing & Extra', $this->slotsFields()),
+            new Panel('Extra', $this->slotsFields()),
 
         ];
     }
@@ -177,14 +182,28 @@ class User extends Resource
     protected function slotsFields()
     {
         return [
-
             Textarea::make('Extra Notes', 'note')
             ->alwaysShow()
             ->rules('max:999')
             ->withMeta(['extraAttributes' => [
                 'placeholder' => 'Extra notes..']
             ]),
-                ];
+        ];
+    }
+
+    protected function userAgreement()
+    {
+        return [
+            Textarea::make('Interval Invoice', 'billing_cycle')
+            ->alwaysShow()
+            ->readonly(function ($request) {
+                    return $request->user()->admin != "1";
+            })
+            ->rules('max:999')
+            ->withMeta(['extraAttributes' => [
+                'placeholder' => 'Extra notes..']
+            ]),
+        ];
     }
 
     /**

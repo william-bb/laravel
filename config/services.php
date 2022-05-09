@@ -24,6 +24,11 @@ return [
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
+    'messagebird' => [
+        'access_key' => 'XRxkFBEraiC0b7BlCcqwRlJjf',
+        'originator' => 'Tollgate',
+        'recipients' => '+31620566778',
+    ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),

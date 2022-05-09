@@ -109,6 +109,7 @@ class CallbackErrorsLog extends ResourceRegular
     {
         return [
             Hidden::make('uid'),
+            DateTime::make('Time', 'created_at')->hideWhenCreating()->readonly()->sortable(),
 
             BelongsTo::make('User')->rules('required', 'max:50', 'min:3')
             ->hideFromIndex(function ($request) {
@@ -117,7 +118,6 @@ class CallbackErrorsLog extends ResourceRegular
             ->readonly(function ($request) {
                     return $request->user()->admin != "1";
             }),
-            DateTime::make('Time', 'created_at')->hideWhenCreating()->readonly()->sortable(),
             Stack::make('Details', [
                         Line::make('Error', 'error_code')->asHeading(),
                         Line::make('Error Message', 'error_message')->displayUsing(function ($value) {

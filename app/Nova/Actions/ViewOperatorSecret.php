@@ -33,11 +33,14 @@ class ViewOperatorSecret extends Action
     if ($models->count() > 1) {
         return Action::danger('Please run this on only one user resource.');
     }
-                    $selectModel = $models->first();
+     
+     $selectModel = $models->first();
 
 
-    if (auth()->user()->id !== $selectModel->ownedBy) {
-        return Action::danger('You are not authorized to generate new secret key.');
+    if (auth()->user()->id != $selectModel->ownedBy) {
+        if(auth()->user()->admin != '1') {
+            return Action::danger('You are not authorized to truncate IP whitelist.');
+        }
     }
 
 
@@ -48,7 +51,7 @@ class ViewOperatorSecret extends Action
     return Action::message('API secret password has been changed.');
 
 
-    }
+    } 
     /**
      * Get the fields available on the action.
      *
@@ -59,10 +62,8 @@ class ViewOperatorSecret extends Action
     {
 
         return [
-            Heading::make('<p>Please note that below secret key is <b>only shown once</b>, after you confirm this action.</p><br><p>Fff</p>')->asHtml(),
-
-            Text::make('Secret')->readonly()->default(Str::random(12).rand(1000, 9999999)),
-
+            Heading::make('<p>Please note that below secret key is <b>only shown once</b>, after you confirm this action your old secret key will be invalidated.</p><br>We are unable to retrieve your old secret keys or current secret keys as they are hashed, so make sure to save it in a secure place before you press confirm.<p</p>')->asHtml(),
+                Text::make('Secret Key', 'secret')->help('Uses default pricing from provider base list, you can add or deduct using this form.')->default(Str::random(12))->rules('required', 'min:4', 'max:15'),
         ];
     }
 }

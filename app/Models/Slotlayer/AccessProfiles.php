@@ -8,16 +8,18 @@ use App\Models\Slotlayer\Gameoptions;
 use \Cache;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+ use Webpatser\Uuid\Uuid;
 
 class AccessProfiles extends Model
-
-{
+ 
+{ 
 
    use HasFactory;
    public $timestamps = true;
-    protected $dateFormat = 'U';
-
-    /**
+   public $primaryKey = 'id';
+   public $uuidKey = 'id';
+   public $incrementing = false; 
+       /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -25,7 +27,7 @@ class AccessProfiles extends Model
     protected $table = 'access_profiles';
      
     protected $fillable = [
-         'profile_name', 'branded', 'api_dk', 'api_evo', 'max_entries_sessions', 'max_hourly_callback_errors', 'max_hourly_createsession_errors', 'max_hourly_demosessions', 'active',
+         'id', 'profile_name', 'branded', 'api_dk', 'api_evo', 'max_entries_sessions', 'max_hourly_callback_errors', 'max_hourly_createsession_errors', 'max_hourly_demosessions', 'active',
     ];
 
     protected $hidden = [
@@ -35,11 +37,8 @@ class AccessProfiles extends Model
         'email_verified_at',
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:i:s',
-        'updated_at' => 'datetime:Y-m-d H:i:s',
-        'deleted_at' => 'datetime:Y-m-d H:i:s',
 
+    protected $casts = [
         'active' => 'boolean',
         'providers' => 'array',
     ];
@@ -87,6 +86,29 @@ class AccessProfiles extends Model
         }
 
         return $profilesCached;
+    }
+
+    public static function getProviderPrice($profile, $provider_id)
+    {   
+        $getProviders = Cache::get('providerPrice:'.$profile.'-'.$provider_id);  
+
+        if (!$getProviders) { 
+            $getProfile = AccessProviders::where('access_profile', $profile)->where('provider', $provider_id)->first();
+
+            if(!$getProfile) {
+                return false;
+            }
+
+            if(!$getProfile->price) {
+                return false;
+            }
+
+            $getProviders = $getProfile->price;
+
+                Cache::put('providerPrice:'.$profile.'-'.$provider_id, $getProviders, Carbon::now()->addMinutes(5));
+        }
+
+        return $getProviders;
     }
 
     public static function getProviders($profile)
@@ -149,6 +171,14 @@ class AccessProfiles extends Model
     {
         Cache::forget('profilesCached');
     }
+
+    public function accessproviders()
+    {
+        return $this->hasMany('App\Models\Slotlayer\AccessProviders', 'access_profile', 'id');
+    }
+
+
+
 
     public static function testRetrieve()
     {

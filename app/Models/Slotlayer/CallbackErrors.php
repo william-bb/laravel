@@ -2,7 +2,6 @@
 
 namespace App\Models\Slotlayer;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use \Cache;
@@ -21,6 +20,7 @@ class CallbackErrors extends Model
    public $timestamps = true;
    public $primaryKey = 'uid';
    public $uuidKey = 'uid';
+   public $incrementing = false; 
 
     /**
      * The attributes that are mass assignable.
@@ -67,6 +67,15 @@ class CallbackErrors extends Model
                 'created_at' => now()
             ]);
         return true;
+    } 
+
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User', 'ownedBy');
+    }
+    public function apikey()
+    {
+        return $this->belongsTo('App\Models\Slotlayer\GameoptionsParent', 'apikey_parent', 'apikey');
     }
     
 

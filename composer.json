@@ -6,15 +6,22 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "coroowicaksono/chart-js-integration": "^0.3.5",
         "cybercog/laravel-nova-ban": "^1.2",
         "guzzlehttp/guzzle": "^7.2",
-        "inspheric/nova-indicator-field": "^1.43",
+        "khalin/nova4-indicator-field": "^1.0",
+        "kirschbaum-development/nova-mail": "^1.0",
         "laravel/framework": "^9.2",
         "laravel/nova": "~4.0",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
         "madewithlove/laravel-nova-uuid-support": "^1.4",
-        "sixlive/nova-text-copy-field": "^1.5"
+        "outofoffice/password-generator": "^1.4",
+        "pdmfc/nova-action-button": "^0.7.4",
+        "predis/predis": "^1.1",
+        "slash2nl/nova-back-button": "^2.0",
+        "thijssimonis/nova-list-card": "^1.1",
+        "wdelfuego/nova4-formattable-date": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.19",
@@ -42,7 +49,7 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+          
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""

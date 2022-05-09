@@ -4,6 +4,8 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\ProcessGamesInternally;
+use App\Console\Commands\UpdateCurrencyRates;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,6 +17,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+
+        $schedule->command(ProcessGamesInternally::class)->everyMinute();
+        $schedule->command(UpdateCurrencyRates::class)->everyTenMinutes();
+
         // $schedule->command('inspire')->hourly();
     }
 

@@ -12,9 +12,15 @@ use Illuminate\Support\Str;
 use Laravel\Nova\Fields\Hidden;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\HasMany;
 
 class AccessProfiles extends ResourceRegular
 {
+ 
+     public static function label()
+    {
+        return 'Parent Profiles';
+    }
 
     public static function authorizedToCreate(Request $request)
     {
@@ -53,7 +59,8 @@ class AccessProfiles extends ResourceRegular
     {
         if(auth()->user()) {
             if($request->user()->admin != '1') {
-                return false;
+                abort(403, 'You have no access here.');
+                die();
             } else {
                 return true;
             }
@@ -66,7 +73,8 @@ class AccessProfiles extends ResourceRegular
     {
         if(auth()->user()) {
             if($request->user()->admin != '1') {
-                return false;
+                abort(403, 'You have no access here.');
+                die();
             } else {
                 return true;
             }
@@ -93,6 +101,7 @@ class AccessProfiles extends ResourceRegular
     {
         return [50, 100, 150, 250, 500];
     } 
+    public static $perPageViaRelationship = 25;
 
     /**
      * The columns that should be searched.
@@ -103,6 +112,7 @@ class AccessProfiles extends ResourceRegular
         'profile_name',
     ];
 
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -112,13 +122,17 @@ class AccessProfiles extends ResourceRegular
     public function fields(NovaRequest $request)
     {
         return [
-
-            ID::make()->sortable()->hideFromIndex(),
-
+            Hidden::make('ID')->hideWhenUpdating()->rules('required', 'max:9')->creationRules('unique:access_profiles,id')->default(rand(10000, 900000000)),
 
             Text::make('Profile Tag', 'profile_name')
                 ->sortable()
+                ->creationRules('unique:access_profiles,profile_name')
                 ->rules('required', 'max:100'),
+
+            Text::make('Providers Loaded',
+            function () {
+                return \App\Models\Slotlayer\AccessProviders::countLoadedProviders($this->resource->id).' / '.\App\Models\Slotlayer\ListProvidersBase::countTotalProviders();
+            })->asHtml(),
 
 
             Select::make('Launcher Branding', 'branded')->options([
@@ -128,14 +142,15 @@ class AccessProfiles extends ResourceRegular
             ])->displayUsingLabels()->help('Brand themes must be setup on lobby launcher before using'),
 
         Number::make('Max. Entries per Session', 'max_entries_sessions')->hideFromIndex()->help('Amount of times a player can enter using same session link.')->min(1)->default(2)->max(1000)->step(1)->rules('required', 'max:10'),
-        Number::make('Demo Sessions per Hour', 'max_hourly_demosessions')->help('Max. demo (fun play) sessions operator can create per hour.')->min(1)->max(2500)->default(400)->step(1)->rules('required', 'max:10'),
+        Number::make('Demo Sessions per Hour', 'max_hourly_demosessions')->help('Max. demo (fun play) sessions operator can create per hour.')->min(1)->max(5000)->default(400)->step(1)->rules('required', 'max:10'),
 
         Number::make('Callback Errors max. per Hour', 'max_hourly_callback_errors')->hideFromIndex()->help('Callback error limit within 1 hour before setting operator to in-active.')->min(1000)->max(15000)->default(5000)->step(1)->rules('required', 'max:10'),
-        Number::make('Create Session Errors max. per Hour', 'max_hourly_createsession_errors')->help('Create Session error limit within 1 hour before setting operator to in-active.')->min(2500)->max(10000)->default(2000)->step(1)->rules('required', 'max:10'),
+        Number::make('Create Session Errors max. per Hour', 'max_hourly_createsession_errors')->help('Create Session error limit within 1 hour before setting operator to in-active.')->min(1000)->max(10000)->default(5000)->step(1)->rules('required', 'max:10'),
 
 
-
-
+             HasMany::make('AccessProvidersList', 'accessproviders')->hideFromIndex(function ($request) {
+                    return $request->user()->admin != "1";
+            })
 
         ];
     }
@@ -182,6 +197,14 @@ class AccessProfiles extends ResourceRegular
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            (new Actions\ProviderUpsert)->onlyOnTableRow()->showOnDetail()
+            ->confirmButtonText('Start Operation')
+            ->cancelButtonText("Cancel"),
+            (new Actions\PopulateSubGamelist)->onlyOnTableRow()->showOnDetail()
+            ->confirmButtonText('Start Operation')
+            ->cancelButtonText("Cancel"),
+            
+        ];
     }
 }

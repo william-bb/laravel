@@ -7,5 +7,7 @@ use Laravel\Nova\Resource as NovaResource;
 
 abstract class ResourceRegular extends NovaResource
 {
+	    public static $perPageViaRelationship = 25;
+
 
 }

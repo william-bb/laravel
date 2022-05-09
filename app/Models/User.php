@@ -9,11 +9,16 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Nova\Actions\Actionable;
 use Laravel\Nova\Auth\Impersonatable;
+use KirschbaumDevelopment\NovaMail\Traits\Mailable;
 
 class User extends Authenticatable
 {
     use Impersonatable, Actionable, HasApiTokens, HasFactory, Notifiable;
-
+    use Mailable;
+    public function getEmailField(): string
+    {
+        return 'email';
+    }
     /**
      * The attributes that are mass assignable.
      *
@@ -23,6 +28,7 @@ class User extends Authenticatable
         'name',
         'email',
         'active',
+        'phonenumber_last_verification',
         'password',
     ];
 
@@ -33,6 +39,8 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'phonenumber',
+        'phonenumber_wrong_tries',
         'support_user',
         'remember_token',
     ];

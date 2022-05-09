@@ -103,6 +103,7 @@ return [
         HandleInertiaRequests::class,
         DispatchServingNovaEvent::class,
         BootTools::class,
+        \App\Http\Middleware\VerifyPhone::class,
     ],
 
     'api_middleware' => [
@@ -122,7 +123,7 @@ return [
     |
     */
 
-    'pagination' => 'simple',
+    'pagination' => 'links',
 
     /*
     |--------------------------------------------------------------------------
@@ -162,15 +163,15 @@ return [
     |
     */
 
-    // 'brand' => [
-    //     'logo' => realpath(__DIR__.'/../public/img/example-logo.svg'),
+    'brand' => [
+        //'logo' => realpath(__DIR__.'/../public/tollgate-white-small-min-100w.svg'),
 
-    //     'colors' => [
-    //         "400" => "24, 182, 155, 0.5",
-    //         "500" => "24, 182, 155",
-    //         "600" => "24, 182, 155, 0.75",
-    //     ]
-    // ],
+   'colors' => [
+             "400" => "57, 117, 255, 0.8",
+             "500" => "57, 117, 255",
+             "600" => "52, 111, 247, 0.95",
+         ]
+     ],
 
     /*
     |--------------------------------------------------------------------------
